@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Persons from "./components/Persons";
 import FilterPerson from "./components/FilterPerson";
 import PersonForm from "./components/PersonForm";
 
 function App() {
+	useEffect(() => {
+		axios
+			.get("http://localhost:3001/persons")
+			.then(response => setPersons(response.data));
+	}, []);
 	const [filtered, setFiltered] = useState("");
 	const [persons, setPersons] = useState([]);
 	const [newPerson, setNewPerson] = useState({ name: "", number: "" });
