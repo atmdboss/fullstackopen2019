@@ -1,7 +1,7 @@
 import React from "react";
 import Person from "./Person";
 
-const Persons = ({ persons, filtered }) => {
+const Persons = ({ persons, filtered, removePerson }) => {
 	return (
 		<>
 			<h2>People</h2>
@@ -20,16 +20,20 @@ const Persons = ({ persons, filtered }) => {
 								)
 								.map(person => (
 									<Person
+										id={person.id}
 										key={person.id}
 										name={person.name}
 										number={person.number}
+										removePerson={removePerson}
 									/>
 								))
 						: persons.map(person => (
 								<Person
+									id={person.id}
 									key={person.id}
 									name={person.name}
 									number={person.number}
+									removePerson={removePerson}
 								/>
 						  ))}
 				</tbody>
