@@ -14,7 +14,7 @@ const update = (id, obj) => {
 	return data.then(response => response.data);
 };
 const remove = id => {
-	axios.delete(`${BASE_URL}/${id}`);
+	return axios.delete(`${BASE_URL}/${id}`);
 };
 
 export default { get, post, update, remove };

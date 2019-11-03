@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import database from "./database";
+import Notification from "./components/Notification";
 import Persons from "./components/Persons";
 import FilterPerson from "./components/FilterPerson";
 import PersonForm from "./components/PersonForm";
@@ -9,6 +10,7 @@ function App() {
 		database.get().then(response => setPersons(response));
 	}, []);
 	const [filtered, setFiltered] = useState("");
+	const [message, setMessage] = useState(null);
 	const [persons, setPersons] = useState([]);
 	const [newPerson, setNewPerson] = useState({ name: "", number: "" });
 
@@ -32,7 +34,18 @@ function App() {
 	};
 
 	const removePerson = id => {
-		database.remove(id);
+		database
+			.remove(id)
+			.then(() =>
+				showMessage(
+					"success",
+					"delete",
+					persons.find(person => person.id === id)
+				)
+			)
+			.catch(() =>
+				showMessage("error", "delete", persons.find(person => person.id === id))
+			);
 		setPersons(persons.filter(person => person.id !== id));
 	};
 
@@ -40,7 +53,9 @@ function App() {
 		if (persons.findIndex(person => person.name === newPerson.name) === -1) {
 			database
 				.post(newPerson)
-				.then(result => setPersons(persons.concat(result)));
+				.then(result => setPersons(persons.concat(result)))
+				.catch(() => showMessage("error", "add", newPerson));
+			showMessage("success", "add", newPerson);
 		} else {
 			if (
 				window.confirm(
@@ -58,13 +73,65 @@ function App() {
 								person.name === result.name ? result : person
 							)
 						)
-					);
+					)
+					.catch(() => showMessage("error", "edit", newPerson));
+				showMessage("success", "edit", newPerson);
 			}
 		}
 	};
+
+	const showMessage = (type, action, person) => {
+		if (type === "success") {
+			if (action === "add") {
+				setMessage({
+					message: `${person.name} has been added to the list`,
+					type
+				});
+				setTimeout(() => {
+					setMessage(null);
+				}, 5000);
+			} else if (action === "edit") {
+				setMessage({
+					message: `Contact ${person.name} has been changed`,
+					type
+				});
+				setTimeout(() => {
+					setMessage(null);
+				}, 5000);
+			} else if (action === "delete") {
+				setMessage({
+					message: `Contact ${person.name} has been removed from your contacts`,
+					type
+				});
+				setTimeout(() => {
+					setMessage(null);
+				}, 5000);
+			}
+		} else if (type === "error") {
+			if (action === "add") {
+				setMessage({
+					message: `Something went worng. ${person.name} was not added`,
+					type
+				});
+				setTimeout(() => {
+					setMessage(null);
+				}, 5000);
+			} else if (action === "edit" || action === "delete") {
+				setMessage({
+					message: `Information on ${person.name} has already been removed`,
+					type
+				});
+				setTimeout(() => {
+					setMessage(null);
+				}, 5000);
+			}
+		}
+	};
+
 	return (
 		<div>
 			<h1>Phonebook</h1>
+			<Notification message={message} />
 			<FilterPerson filtered={filtered} handleFilter={handleFilter} />
 			<PersonForm
 				newPerson={newPerson}
