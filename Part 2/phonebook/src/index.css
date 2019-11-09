@@ -1,14 +1,15 @@
 .error {
-	border: 3px solid red;
-	margin: 0 auto;
-	text-align: center;
+	border-color: red;
 	color: red;
-	font-size: 1.2em;
 }
 .success {
-	border: 3px solid green;
+	border-color: green;
+	color: green;
+}
+.msg {
+	border-style: solid;
+	border-width: 3px;
 	margin: 0 auto;
 	text-align: center;
-	color: green;
 	font-size: 1.2em;
 }

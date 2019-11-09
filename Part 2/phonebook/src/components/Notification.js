@@ -8,7 +8,7 @@ const Notification = ({ message }) => {
 		return message.type === "success" ? "success" : "error";
 	};
 	return (
-		<div className={pickClass()}>
+		<div className={`msg ${pickClass()}`}>
 			<p>{message.message}</p>
 		</div>
 	);

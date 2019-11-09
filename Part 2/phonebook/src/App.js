@@ -36,26 +36,32 @@ function App() {
 	const removePerson = id => {
 		database
 			.remove(id)
-			.then(() =>
+			.then(() => {
 				showMessage(
 					"success",
-					"delete",
-					persons.find(person => person.id === id)
-				)
-			)
-			.catch(() =>
-				showMessage("error", "delete", persons.find(person => person.id === id))
-			);
-		setPersons(persons.filter(person => person.id !== id));
+					persons.find(person => person.id === id),
+					"delete"
+				);
+				setPersons(persons.filter(person => person.id !== id));
+			})
+			.catch(err => {
+				const error = err.response.data.error;
+				showMessage("error", error);
+			});
 	};
 
 	const handlePeople = () => {
 		if (persons.findIndex(person => person.name === newPerson.name) === -1) {
 			database
 				.post(newPerson)
-				.then(result => setPersons(persons.concat(result)))
-				.catch(() => showMessage("error", "add", newPerson));
-			showMessage("success", "add", newPerson);
+				.then(result => {
+					setPersons(persons.concat(result));
+					showMessage("success", newPerson, "add");
+				})
+				.catch(err => {
+					const error = err.response.data.error;
+					showMessage("error", error);
+				});
 		} else {
 			if (
 				window.confirm(
@@ -67,24 +73,27 @@ function App() {
 						persons.find(person => person.name === newPerson.name).id,
 						newPerson
 					)
-					.then(result =>
+					.then(result => {
 						setPersons(
 							persons.map(person =>
 								person.name === result.name ? result : person
 							)
-						)
-					)
-					.catch(() => showMessage("error", "edit", newPerson));
-				showMessage("success", "edit", newPerson);
+						);
+						showMessage("success", newPerson, "edit");
+					})
+					.catch(err => {
+						const error = err.response.data.error;
+						showMessage("error", error);
+					});
 			}
 		}
 	};
 
-	const showMessage = (type, action, person) => {
+	const showMessage = (type, object, action) => {
 		if (type === "success") {
 			if (action === "add") {
 				setMessage({
-					message: `${person.name} has been added to the list`,
+					message: `${object.name} has been added to the list`,
 					type
 				});
 				setTimeout(() => {
@@ -92,7 +101,7 @@ function App() {
 				}, 5000);
 			} else if (action === "edit") {
 				setMessage({
-					message: `Contact ${person.name} has been changed`,
+					message: `Contact ${object.name} has been changed`,
 					type
 				});
 				setTimeout(() => {
@@ -100,7 +109,7 @@ function App() {
 				}, 5000);
 			} else if (action === "delete") {
 				setMessage({
-					message: `Contact ${person.name} has been removed from your contacts`,
+					message: `Contact ${object.name} has been removed from your contacts`,
 					type
 				});
 				setTimeout(() => {
@@ -108,23 +117,10 @@ function App() {
 				}, 5000);
 			}
 		} else if (type === "error") {
-			if (action === "add") {
-				setMessage({
-					message: `Something went worng. ${person.name} was not added`,
-					type
-				});
-				setTimeout(() => {
-					setMessage(null);
-				}, 5000);
-			} else if (action === "edit" || action === "delete") {
-				setMessage({
-					message: `Information on ${person.name} has already been removed`,
-					type
-				});
-				setTimeout(() => {
-					setMessage(null);
-				}, 5000);
-			}
+			setMessage({ message: object.message, type });
+			setTimeout(() => {
+				setMessage(null);
+			}, 5000);
 		}
 	};
 
