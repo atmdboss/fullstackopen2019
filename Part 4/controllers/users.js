@@ -7,16 +7,27 @@ usersRouter.get("/", async (request, response) => {
 	response.json(users.map(u => u.toJSON()));
 });
 
+usersRouter.get("/:id", async (request, response, next) => {
+	const { id } = request.params;
+	try {
+		const user = await User.findById(id).populate("blogs");
+		response.json(user.toJSON());
+	} catch (error) {
+		next(error);
+	}
+});
+
 usersRouter.post("/", async (request, response, next) => {
 	const { body } = request;
 
-	const salt = bcrypt.genSaltSync(10);
 	if (!body.password || body.password.length < 3) {
 		return response
 			.status(400)
 			.json({ error: "password must be 3 characters at least" });
 	}
-	const passwordHash = bcrypt.hashSync(body.password, salt);
+
+	const salt = await bcrypt.genSalt(10);
+	const passwordHash = await bcrypt.hash(body.password, salt);
 
 	try {
 		const user = new User({

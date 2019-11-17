@@ -1,0 +1,16 @@
+.notification {
+	border-width: 3px;
+	border-radius: 10px;
+	border-style: solid;
+	text-align: center;
+	font-size: 1.2em;
+	font-family: monospace, "Courier New", Courier;
+}
+.error {
+	border-color: red;
+	color: red;
+}
+.success {
+	border-color: green;
+	color: green;
+}
