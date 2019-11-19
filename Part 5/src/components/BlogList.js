@@ -6,7 +6,9 @@ const BlogList = ({
 	loggedInUser,
 	setLoggedInUser,
 	setUserBlogs,
-	showNotification
+	showNotification,
+	updateBlog,
+	removeBlog
 }) => {
 	const handleLogout = () => {
 		window.localStorage.removeItem("user");
@@ -22,9 +24,18 @@ const BlogList = ({
 				<button onClick={handleLogout}>logout</button>
 			</p>
 			<div>
-				{blogs.map(blog => (
-					<Blog blog={blog} key={blog.id} />
-				))}
+				{blogs
+					.sort((a, b) => a.likes - b.likes)
+					.map(blog => (
+						<Blog
+							blog={blog}
+							key={blog.id}
+							id={blog.id}
+							updateBlog={updateBlog}
+							removeBlog={removeBlog}
+							loggedInUser={loggedInUser}
+						/>
+					))}
 			</div>
 		</>
 	);

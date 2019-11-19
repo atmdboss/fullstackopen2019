@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const CreateBlog = ({ createNewBlog }) => {
+const CreateBlog = ({ createNewBlog, blogRef, showNotification }) => {
 	const [blog, setBlog] = useState({ title: "", author: "", url: "" });
 	const { title, author, url } = blog;
 	const handleChange = event => {
@@ -8,8 +8,13 @@ const CreateBlog = ({ createNewBlog }) => {
 	};
 	const postBlog = event => {
 		event.preventDefault();
+		if (!title || !author || !url) {
+			showNotification("Please input all fields", "err");
+			return;
+		}
 		createNewBlog(blog);
 		setBlog({ title: "", author: "", url: "" });
+		blogRef.current.handleClick();
 	};
 	return (
 		<>

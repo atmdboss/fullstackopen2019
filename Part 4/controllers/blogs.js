@@ -6,7 +6,7 @@ const SECRET = require("../utils/config").SECRET;
 
 blogRouter.get("/", async (request, response, next) => {
 	try {
-		const data = await Blog.find({}).populate("user");
+		const data = await Blog.find({}).populate("user", "name username");
 		const modifiedData = data.map(blog => blog.toJSON());
 		return response.json(modifiedData);
 	} catch (err) {
@@ -17,7 +17,7 @@ blogRouter.get("/", async (request, response, next) => {
 blogRouter.get("/:id", async (request, response, next) => {
 	try {
 		const { id } = request.params;
-		const blog = await Blog.findById(id);
+		const blog = await Blog.findById(id).populate("user", "name username");
 		return response.json(blog.toJSON());
 	} catch (error) {
 		next(error);
@@ -46,20 +46,39 @@ blogRouter.post("/", async (request, response, next) => {
 		const savedBlog = await blog.save();
 		user.blogs = user.blogs.concat(savedBlog._id);
 		await user.save();
-		return response.status(201).json(savedBlog.toJSON());
+		const fullBlog = await Blog.findById(savedBlog._id).populate(
+			"user",
+			"name username"
+		);
+		return response.status(201).json(fullBlog.toJSON());
 	} catch (err) {
 		next(err);
 	}
 });
 
 blogRouter.put("/:id", async (request, response, next) => {
+	const { id } = request.params;
+	const { token } = request;
+	
 	try {
-		const { id } = request.params;
-		const modifiedBlog = request.body;
-		const updatedBlog = await Blog.findByIdAndUpdate(id, modifiedBlog, {
-			new: true
-		});
-		return response.json(updatedBlog.toJSON());
+		const decodedToken = jwt.verify(token, SECRET);
+
+		if (!token || !decodedToken.id) {
+			return response.status(401).json({ error: "token missing or invalid" });
+		}
+		
+		if(decodedToken.username === request.body.user.username){
+			const blog = await Blog.findById(id);
+			blog.likes = request.body.likes;
+			await blog.save();
+			const updatedBlog = await Blog.findById(id).populate(
+				"user",
+				"name username"
+			);
+			return response.json(updatedBlog.toJSON());
+		} else {
+			return response.json({error: "This is not your post"})
+		}		
 	} catch (err) {
 		next(err);
 	}

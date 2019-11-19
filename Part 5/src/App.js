@@ -3,6 +3,7 @@ import LoginForm from "./components/LoginForm";
 import BlogList from "./components/BlogList";
 import CreateBlog from "./components/CreateBlog";
 import Notification from "./components/Notification";
+import Toggable from "./components/Toggable";
 import services from "./services/blogs";
 
 function App() {
@@ -17,7 +18,9 @@ function App() {
 	useEffect(() => {
 		const user = window.localStorage.getItem("user");
 		if (user) {
-			setLoggedInUser(JSON.parse(user));
+			const parsedUser = JSON.parse(user);
+			setLoggedInUser(parsedUser);
+			services.setToken(parsedUser.token);
 		}
 	}, []);
 	useEffect(() => {
@@ -52,6 +55,37 @@ function App() {
 		}
 	};
 
+	const updateBlog = async (id, updatedBlog) => {
+		try {
+			const response = await services.update(id, updatedBlog);
+			if (response.error) {
+				showNotification(response.error, "err");
+			}
+			setUserBlogs(
+				userBlogs.map(blog => {
+					return blog.title === response.title &&
+						blog.user.name === response.user.name
+						? response
+						: blog;
+				})
+			);
+		} catch (error) {
+			showNotification(error.response.data.error, "err");
+		}
+	};
+
+	const removeBlog = async id => {
+		try {
+			if (window.confirm("Are you sure you want to delete this blog?")) {
+				await services.remove(id);
+				setUserBlogs(userBlogs.filter(blog => blog.id !== id));
+				showNotification("Removed successfully", "success");
+			}
+		} catch (error) {
+			showNotification(error.response.data.error, "err");
+		}
+	};
+
 	const loginUser = async event => {
 		event.preventDefault();
 		try {
@@ -70,6 +104,7 @@ function App() {
 			setMessage(null);
 		}, 5000);
 	};
+	const blogRef = React.createRef();
 	return (
 		<>
 			<Notification message={message} />
@@ -87,9 +122,17 @@ function App() {
 						loggedInUser={loggedInUser}
 						blogs={userBlogs}
 						showNotification={showNotification}
+						updateBlog={updateBlog}
+						removeBlog={removeBlog}
 					/>
 
-					<CreateBlog createNewBlog={createNewBlog} />
+					<Toggable ref={blogRef}>
+						<CreateBlog
+							showNotification={showNotification}
+							blogRef={blogRef}
+							createNewBlog={createNewBlog}
+						/>
+					</Toggable>
 				</>
 			)}
 		</>
