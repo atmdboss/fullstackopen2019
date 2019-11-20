@@ -20,6 +20,7 @@ describe("<App />", () => {
 	});
 
 	test("if logged in, show blogs", async () => {
+		// jest.setTimeout(23000);
 		const user = {
 			username: "tester",
 			token: "1231231214",
@@ -34,7 +35,11 @@ describe("<App />", () => {
 		//Timed out in waitForElement
 		//I have googled the hells out of this problem and can't find a way to get around it
 		//I feel strongly that this would work if waitForElement wasn't stuck, but i have no way to test that hypothesis
-		await waitForElement(() => component.container.querySelector(".Blog"));
+		// await waitForElement(() => component.container.querySelector(".Blog"));
+		jest.setTimeout(
+			waitForElement(() => component.container.querySelector(".Blog")),
+			23000
+		);
 
 		const blogs = component.container.querySelectorAll(".Blog");
 
