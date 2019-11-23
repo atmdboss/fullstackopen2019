@@ -16,6 +16,7 @@ const asObject = anecdote => {
 		votes: 0
 	};
 };
+
 // **************ACTION CREATORS*****************//
 export const addAnecdote = anecdote => {
 	return {
@@ -23,14 +24,15 @@ export const addAnecdote = anecdote => {
 		data: asObject(anecdote)
 	};
 };
-export const upvoteAnecdote = (store, id) => {
-	const found = store.getState().find(anecdote => anecdote.id === id);
+export const upvoteAnecdote = (anecdotes, id) => {
+	const found = anecdotes.find(anecdote => anecdote.id === id);
 	return {
 		type: "UPDATE_ANECDOTE",
 		data: { ...found, votes: found.votes + 1 }
 	};
 };
 // **************ACTION CREATORS*****************//
+
 const updateState = (state, newAnecdote) => {
 	return state.map(anecdote =>
 		anecdote.id === newAnecdote.id ? newAnecdote : anecdote
@@ -40,8 +42,8 @@ const updateState = (state, newAnecdote) => {
 const initialState = anecdotesAtStart.map(asObject);
 
 const reducer = (state = initialState, action) => {
-	console.log("state now: ", state);
-	console.log("action", action);
+	// console.log("state now: ", state);
+	// console.log("action", action);
 	switch (action.type) {
 		case "ADD_ANECDOTE":
 			return [...state, action.data];

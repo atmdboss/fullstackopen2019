@@ -1,38 +1,39 @@
 import React from "react";
-import { upvoteAnecdote } from "../reducers/anecdoteReducer";
+import Anecdote from "./Anecdote";
+import { connect } from "react-redux";
 
-const Anecdote = ({ id, content, votes, store }) => {
-	const handleVote = () => {
-		store.dispatch(upvoteAnecdote(store, id));
-	};
+const AnecdoteList = props => {
+	const { anecdotes } = props;
 	return (
 		<div>
-			<div>{content}</div>
-			<div>
-				has {votes} {votes === 1 ? "vote" : "votes"}
-			</div>
-			<button onClick={handleVote}>Vote</button>
-		</div>
-	);
-};
-
-const AnecdoteList = ({ store }) => {
-	return (
-		<div>
-			{store
-				.getState()
+			<h2>Anecdotes</h2>
+			{anecdotes
 				.sort((a, b) => a.votes - b.votes)
-				.map(anecdote => (
-					<Anecdote
-						key={anecdote.id}
-						id={anecdote.id}
-						content={anecdote.content}
-						votes={anecdote.votes}
-						store={store}
-					/>
-				))}
+				.map(anecdote => {
+					return (
+						<Anecdote
+							key={anecdote.id}
+							id={anecdote.id}
+							content={anecdote.content}
+							votes={anecdote.votes}
+						/>
+					);
+				})}
 		</div>
 	);
 };
+const anecdotesToShow = ({ filter, anecdotes }) => {
+	if (!filter) {
+		return anecdotes;
+	}
 
-export default AnecdoteList;
+	return anecdotes.filter(anecdote =>
+		anecdote.content.toLowerCase().includes(filter.toLowerCase())
+	);
+};
+const mapStateToProps = state => {
+	return {
+		anecdotes: anecdotesToShow(state)
+	};
+};
+export default connect(mapStateToProps)(AnecdoteList);
