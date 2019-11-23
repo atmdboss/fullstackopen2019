@@ -2,9 +2,9 @@ import React from "react";
 import { connect } from "react-redux";
 import { filter } from "../reducers/filterReducer";
 
-const Filter = props => {
+const Filter = ({ filter }) => {
 	const handleChange = event => {
-		props.filter(event.target.value);
+		filter(event.target.value);
 	};
 	return (
 		<div>

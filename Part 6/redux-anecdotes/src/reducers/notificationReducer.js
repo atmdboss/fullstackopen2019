@@ -12,22 +12,17 @@ const notificationReducer = (state = null, action) => {
 	}
 };
 // **************ACTION CREATORS*****************//
-export const upvoteMessage = (anecdotes, id) => {
-	const found = anecdotes.find(anecdote => anecdote.id === id);
-	return {
-		type: "SHOW_NOTIFICATION",
-		data: `You just voted "${found.content}"`
-	};
-};
-export const createMessage = title => {
-	return {
-		type: "SHOW_NOTIFICATION",
-		data: `You just created ${title}`
-	};
-};
-export const hideMessages = () => {
-	return {
-		type: "HIDE_NOTIFICATION"
+export const setNotification = (message, time) => {
+	return async dispatch => {
+		dispatch({
+			type: "SHOW_NOTIFICATION",
+			data: message
+		});
+		setTimeout(() => {
+			dispatch({
+				type: "HIDE_NOTIFICATION"
+			});
+		}, time.toFixed(2) * 1000);
 	};
 };
 // **************ACTION CREATORS*****************//

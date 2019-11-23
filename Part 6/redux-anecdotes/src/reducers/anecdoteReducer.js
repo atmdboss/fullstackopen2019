@@ -1,34 +1,34 @@
-const anecdotesAtStart = [
-	"If it hurts, do it more often",
-	"Adding manpower to a late software project makes it later!",
-	"The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.",
-	"Any fool can write code that a computer can understand. Good programmers write code that humans can understand.",
-	"Premature optimization is the root of all evil.",
-	"Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it."
-];
-
-const getId = () => (100000 * Math.random()).toFixed(0);
-
-const asObject = anecdote => {
-	return {
-		content: anecdote,
-		id: getId(),
-		votes: 0
-	};
-};
+import anecdoteService from "../services/anecdotes";
 
 // **************ACTION CREATORS*****************//
-export const addAnecdote = anecdote => {
-	return {
-		type: "ADD_ANECDOTE",
-		data: asObject(anecdote)
+export const addAnecdote = content => {
+	return async dispatch => {
+		const anecdote = { content, votes: 0 };
+		const newAnecdote = await anecdoteService.create(anecdote);
+		dispatch({
+			type: "ADD_ANECDOTE",
+			data: newAnecdote
+		});
 	};
 };
 export const upvoteAnecdote = (anecdotes, id) => {
-	const found = anecdotes.find(anecdote => anecdote.id === id);
-	return {
-		type: "UPDATE_ANECDOTE",
-		data: { ...found, votes: found.votes + 1 }
+	return async dispatch => {
+		const found = anecdotes.find(anecdote => anecdote.id === id);
+		const updatedObj = { ...found, votes: found.votes + 1 };
+		const updatedAnecdote = await anecdoteService.update(id, updatedObj);
+		dispatch({
+			type: "UPDATE_ANECDOTE",
+			data: updatedAnecdote
+		});
+	};
+};
+export const initAnecdotes = () => {
+	return async dispatch => {
+		const anecdotes = await anecdoteService.getAll();
+		dispatch({
+			type: "INIT_ANECDOTES",
+			data: anecdotes
+		});
 	};
 };
 // **************ACTION CREATORS*****************//
@@ -39,9 +39,7 @@ const updateState = (state, newAnecdote) => {
 	);
 };
 
-const initialState = anecdotesAtStart.map(asObject);
-
-const reducer = (state = initialState, action) => {
+const reducer = (state = [], action) => {
 	// console.log("state now: ", state);
 	// console.log("action", action);
 	switch (action.type) {
@@ -50,6 +48,9 @@ const reducer = (state = initialState, action) => {
 			break;
 		case "UPDATE_ANECDOTE":
 			return updateState(state, action.data);
+			break;
+		case "INIT_ANECDOTES":
+			return action.data;
 			break;
 		default:
 			return state;

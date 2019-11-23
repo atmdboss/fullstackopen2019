@@ -1,12 +1,14 @@
 import React from "react";
 import Anecdote from "./Anecdote";
 import { connect } from "react-redux";
+import Filter from "./Filter";
 
-const AnecdoteList = props => {
-	const { anecdotes } = props;
+const AnecdoteList = ({ anecdotes }) => {
 	return (
 		<div>
 			<h2>Anecdotes</h2>
+			<Filter />
+			<br />
 			{anecdotes
 				.sort((a, b) => a.votes - b.votes)
 				.map(anecdote => {

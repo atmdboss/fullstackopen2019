@@ -1,24 +1,19 @@
 import React from "react";
 import { connect } from "react-redux";
 import { upvoteAnecdote } from "../reducers/anecdoteReducer";
-import { upvoteMessage, hideMessages } from "../reducers/notificationReducer";
+import { setNotification } from "../reducers/notificationReducer";
 
-const Anecdote = props => {
-	const {
-		id,
-		content,
-		votes,
-		anecdotes,
-		upvoteAnecdote,
-		upvoteMessage,
-		hideMessages
-	} = props;
+const Anecdote = ({
+	id,
+	content,
+	votes,
+	anecdotes,
+	upvoteAnecdote,
+	setNotification
+}) => {
 	const handleVote = () => {
 		upvoteAnecdote(anecdotes, id);
-		upvoteMessage(anecdotes, id);
-		setTimeout(() => {
-			hideMessages();
-		}, 5000);
+		setNotification(`You upvoted "${content}"`, 5);
 	};
 	return (
 		<div>
@@ -37,8 +32,7 @@ const mapStateToProps = state => {
 };
 const mapDispatchToProps = {
 	upvoteAnecdote,
-	upvoteMessage,
-	hideMessages
+	setNotification
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Anecdote);

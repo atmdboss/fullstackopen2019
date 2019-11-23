@@ -2,19 +2,15 @@ import React from "react";
 import { connect } from "react-redux";
 import { useField } from "../hooks/index";
 import { addAnecdote } from "../reducers/anecdoteReducer";
-import { createMessage, hideMessages } from "../reducers/notificationReducer";
+import { setNotification } from "../reducers/notificationReducer";
 
-const AnecdoteForm = props => {
-	const { addAnecdote, createMessage, hideMessages } = props;
+const AnecdoteForm = ({ addAnecdote, setNotification }) => {
 	const textField = useField("text");
 
 	const handleSubmit = event => {
 		event.preventDefault();
 		addAnecdote(textField.input.value);
-		createMessage(textField.input.value);
-		setTimeout(() => {
-			hideMessages();
-		}, 5000);
+		setNotification(`You added "${textField.input.value}"`, 5);
 		textField.reset();
 	};
 
@@ -31,8 +27,7 @@ const AnecdoteForm = props => {
 
 const mapDispatchToProps = {
 	addAnecdote,
-	createMessage,
-	hideMessages
+	setNotification
 };
 
 export default connect(null, mapDispatchToProps)(AnecdoteForm);

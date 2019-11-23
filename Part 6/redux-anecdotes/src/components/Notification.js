@@ -4,8 +4,10 @@ import { connect } from "react-redux";
 const Notification = props => {
 	const style = {
 		border: "solid",
+		borderRadius: "10",
 		padding: 10,
-		borderWidth: 1
+		borderWidth: 2,
+		textAlign: "center"
 	};
 	const { notification } = props;
 	if (!notification) {
