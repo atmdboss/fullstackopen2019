@@ -58,18 +58,18 @@ blogRouter.post("/", async (request, response, next) => {
 
 blogRouter.put("/:id", async (request, response, next) => {
 	const { id } = request.params;
-	const { token } = request;
-	
+	const { token, body } = request;
+
 	try {
 		const decodedToken = jwt.verify(token, SECRET);
 
 		if (!token || !decodedToken.id) {
 			return response.status(401).json({ error: "token missing or invalid" });
 		}
-		
-		if(decodedToken.username === request.body.user.username){
+
+		if (decodedToken.username === body.user.username) {
 			const blog = await Blog.findById(id);
-			blog.likes = request.body.likes;
+			blog.likes = body.likes;
 			await blog.save();
 			const updatedBlog = await Blog.findById(id).populate(
 				"user",
@@ -77,10 +77,28 @@ blogRouter.put("/:id", async (request, response, next) => {
 			);
 			return response.json(updatedBlog.toJSON());
 		} else {
-			return response.json({error: "This is not your post"})
-		}		
+			return response.json({ error: "This is not your post" });
+		}
 	} catch (err) {
 		next(err);
+	}
+});
+
+blogRouter.put("/:id/comments", async (request, response, next) => {
+	const { body } = request;
+	const { id } = request.params;
+
+	try {
+		const blog = await Blog.findById(id);
+		blog.comments = blog.comments.concat(body.comment);
+		await blog.save();
+		const updatedBlog = await Blog.findById(id).populate(
+			"user",
+			"name username"
+		);
+		response.json(updatedBlog.toJSON());
+	} catch (error) {
+		next(error);
 	}
 });
 
