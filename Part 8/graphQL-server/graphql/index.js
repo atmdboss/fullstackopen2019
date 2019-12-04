@@ -4,7 +4,9 @@ const Book = require("../models/book");
 const Author = require("../models/author");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const {SECRET} = require("../utils/config");
+const { SECRET } = require("../utils/config");
+const { PubSub } = require("apollo-server");
+const pubsub = new PubSub();
 
 const typeDefs = gql`
 	type User {
@@ -51,6 +53,10 @@ const typeDefs = gql`
 		createUser(username: String!, favoriteGenre: String!): User
 		login(username: String!, password: String!): Token
 	}
+
+	type Subscription {
+		bookAdded: Book!
+	}
 `;
 
 const resolvers = {
@@ -91,22 +97,24 @@ const resolvers = {
 	},
 	Mutation: {
 		addBook: async (root, args, { currentUser }) => {
-            //if not logged in,throw err
+			//if not logged in,throw err
 			if (!currentUser) {
 				throw new Error("not logged in");
 			}
-            const authors = await Author.find({});
+			const authors = await Author.find({});
 
-            //if author does not exist,create new author
+			//if author does not exist,create new author
 			if (authors.findIndex(author => author.name === args.author) === -1) {
 				const author = new Author({ name: args.author });
 				await author.save();
-            }
-            
+			}
+
 			try {
 				const book = new Book({ ...args });
 				const author = authors.find(author => author.name === args.author);
 				book.author = author._id;
+
+				pubsub.publish("BOOK_ADDED", { bookAdded: book });
 
 				await book.save();
 			} catch (error) {
@@ -122,7 +130,7 @@ const resolvers = {
 			const authors = await Author.find({});
 
 			if (authors.findIndex(author => author.name === args.name) === -1) {
-                //author non-existent
+				//author non-existent
 				return null;
 			}
 			try {
@@ -156,6 +164,11 @@ const resolvers = {
 			};
 
 			return { value: jwt.sign(userForToken, SECRET) };
+		}
+	},
+	Subscription: {
+		bookAdded: {
+			subscribe: () => pubsub.asyncIterator(["BOOK_ADDED"])
 		}
 	}
 };
